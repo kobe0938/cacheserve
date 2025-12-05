@@ -12,8 +12,8 @@ METHOD = 'keydiff'
 ANSWER_INDEX = 1
 SLO = 0.9
 compression_rates = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-datasets = df['dataset'].unique()
-# datasets = ['samsum']
+# datasets = df['dataset'].unique()
+datasets = ['samsum']
 
 # Create subplots
 fig, axes = plt.subplots(3, 4, figsize=(16, 12))
@@ -28,7 +28,7 @@ for idx, dataset_name in enumerate(datasets):
     print("failed_contexts: ", failed_contexts)
     cdf_values = []
     
-    for rate in compression_rates:
+    for i, rate in enumerate(compression_rates):
         # Get column for this compression rate with specified answer index
         rate_formatted = str(rate).replace('.', 'p')
         col_name = METHOD + '_' + rate_formatted + '_answer' + str(ANSWER_INDEX)
@@ -44,15 +44,19 @@ for idx, dataset_name in enumerate(datasets):
         failed_contexts = failed_contexts | current_fails
         print("failed_contexts: ", failed_contexts)
         
+        # Store the count (will shift later)
         cdf_values.append(failed_contexts.sum())
     
-    # Plot CDF
-    axes[idx].plot(compression_rates, cdf_values, marker='o', linewidth=2)
+    # Shift values: count failures at rate n as failures at rate n-1
+    # cdf_values[i] should show failures that occur at compression_rates[i-1]
+    cdf_values_shifted = [0] + cdf_values[:-1]
+    
+    # Plot CDF with shifted values (count of failed contexts)
+    axes[idx].plot(compression_rates, cdf_values_shifted, marker='o', linewidth=2)
     axes[idx].set_xlabel('Compression Rate')
-    axes[idx].set_ylabel('CDF: Fraction of Contexts Failed')
+    axes[idx].set_ylabel('Count of Contexts Failed')
     axes[idx].set_title(dataset_name)
     axes[idx].grid(True, alpha=0.3)
-    axes[idx].set_ylim([0, 1.05])
     axes[idx].set_xlim([0.05, 0.95])
 
 # Hide extra subplots
