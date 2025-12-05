@@ -16,8 +16,8 @@ original_rates = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
 # Shifted rates for display (each rate shifts down by 0.1)
 compression_rates = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0]
 
-# datasets = df['dataset'].unique()
-datasets = ['samsum']
+datasets = df['dataset'].unique()
+# datasets = ['samsum']
 
 # Create subplots
 fig, axes = plt.subplots(3, 4, figsize=(16, 12))
@@ -58,8 +58,9 @@ for idx, dataset_name in enumerate(datasets):
     never_failed = total_contexts - failed_contexts.sum()
     pdf_values = [never_failed] + pdf_values
     
-    # CDF
-    cdf_values = np.cumsum(pdf_values).tolist()
+    # CDF - convert to fraction (0-1)
+    cdf_values = np.cumsum(pdf_values) / total_contexts
+    cdf_values = cdf_values.tolist()
     
     # Plot CDF with shifted labels
     x_positions = range(len(compression_rates))
@@ -67,8 +68,9 @@ for idx, dataset_name in enumerate(datasets):
     axes[idx].set_xticks(x_positions)
     axes[idx].set_xticklabels(compression_rates)
     axes[idx].set_xlabel('Compression Rate')
-    axes[idx].set_ylabel('Cumulative Count of Contexts Satisfying SLO')
+    axes[idx].set_ylabel('Fraction of Contexts Satisfying SLO')
     axes[idx].set_title(dataset_name)
+    axes[idx].set_ylim([0, 1.05])
     axes[idx].grid(True, alpha=0.3)
 
 # Hide extra subplots
