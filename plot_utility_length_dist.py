@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Configuration
-DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/relative_scores_final_with_h2o_46to50_higher.csv'
+DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/presses_scores_1and2and3.csv'
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/length_distribution_plots/'
 ANSWER_INDEX = 1
 A = 1  # Utility function constant
