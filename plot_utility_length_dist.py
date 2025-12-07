@@ -72,6 +72,7 @@ def plot_length_distributions(results, compression_rate):
     # Prepare data for box plot
     data = []
     labels = []
+    colors = ['steelblue', 'darkorange', 'forestgreen']
     
     for method in METHODS:
         if method in results and len(results[method]) > 0:
@@ -83,8 +84,8 @@ def plot_length_distributions(results, compression_rate):
     bp = ax.boxplot(data, labels=labels, patch_artist=True)
     
     # Style the boxes
-    for patch in bp['boxes']:
-        patch.set_facecolor('steelblue')
+    for patch, color in zip(bp['boxes'], colors):
+        patch.set_facecolor(color)
         patch.set_alpha(0.7)
     
     ax.set_ylabel('length', fontsize=12)
