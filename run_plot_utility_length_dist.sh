@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Answer indices to process (1 to 50)
-for answer_idx in 12; do
+for answer_idx in {1..50}; do
     echo "Processing: answer index $answer_idx"
     # Create temp file with modified ANSWER_INDEX
     sed "s/^ANSWER_INDEX = .*/ANSWER_INDEX = $answer_idx/" plot_utility_length_dist.py > temp_plot.py
