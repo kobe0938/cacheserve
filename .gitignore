@@ -1,3 +1,5 @@
 *.csv
 cdf_plots/
 *.png
+*.pyc
+.DS_Store
