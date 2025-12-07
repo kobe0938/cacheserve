@@ -6,7 +6,7 @@ from plot_utility_length_dist import calculate_utility, load_data
 # Configuration
 DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv'
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/optimal_compression_plots/'
-METHODS = ['snapkv']
+METHODS = ['keydiff', 'knorm', 'snapkv']
 ANSWER_INDEX = 1
 alpha = 0.5
 COMPRESSION_RATES = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
@@ -26,6 +26,7 @@ CATEGORIES = {
 def find_optimal_compression_per_entry(df):
     """
     For each entry in the specified datasets, find the best method and compression rate with highest utility.
+    Uses average utility across answer indices 1-50.
     Returns dict: {category: [list of optimal compression rates]}
     """
     L = df['length'].max()  # Global max length
@@ -60,23 +61,30 @@ def find_optimal_compression_per_entry(df):
         
         # Calculate utility for all methods and compression rates
         best_rate = None
-        best_utility = -float('inf')
+        best_avg_utility = -float('inf')
         
         # Loop through all methods
         for method in METHODS:
             # Loop through all compression rates
             for rate in COMPRESSION_RATES:
                 rate_str = str(rate).replace('.', 'p')
-                col_name = f"{method}_{rate_str}_answer{ANSWER_INDEX}"
                 
-                if col_name not in df.columns:
-                    continue
+                # Calculate average utility across answer indices 1-50
+                utilities = []
+                for answer_idx in range(1, 51):
+                    col_name = f"{method}_{rate_str}_answer{answer_idx}"
+                    
+                    if col_name not in df.columns:
+                        continue
+                    
+                    quality_score = row[col_name]
+                    utility = calculate_utility(alpha, quality_score, rate, context_length, L)
+                    utilities.append(utility)
                 
-                quality_score = row[col_name]
-                utility = calculate_utility(alpha, quality_score, rate, context_length, L)
-                
-                if utility > best_utility:
-                    best_utility = utility
+                assert len(utilities) == 50, f"Expected 50 utilities for {method}_{rate_str}_answer{answer_idx}, got {len(utilities)}"
+                avg_utility = np.mean(utilities)
+                if avg_utility > best_avg_utility:
+                    best_avg_utility = avg_utility
                     best_rate = rate
         
         # Add this entry's optimal compression rate to the category
@@ -117,7 +125,7 @@ def plot_optimal_compression_distribution(results):
     
     plt.tight_layout()
     methods_str = '_'.join(METHODS)
-    output_filename = f'optimal_compression_by_category_{methods_str}_answer{ANSWER_INDEX}_alpha{alpha}.png'
+    output_filename = f'optimal_compression_by_category_{methods_str}_answers1-50_alpha{alpha}.png'
     plt.savefig(PLOT_DIR + output_filename, dpi=300, bbox_inches='tight')
     print(f"\nSaved plot to {output_filename}")
     
@@ -130,10 +138,10 @@ def plot_optimal_compression_distribution(results):
             print(f"  Entries: {len(rates)}")
             print(f"  Mean: {np.mean(rates):.3f}")
             print(f"  Median: {np.median(rates):.3f}")
-            print(f"  Min: {np.min(rates):.3f}")
-            print(f"  Max: {np.max(rates):.3f}")
-            print(f"  25th percentile: {np.percentile(rates, 25):.3f}")
-            print(f"  75th percentile: {np.percentile(rates, 75):.3f}")
+            # print(f"  Min: {np.min(rates):.3f}")
+            # print(f"  Max: {np.max(rates):.3f}")
+            # print(f"  25th percentile: {np.percentile(rates, 25):.3f}")
+            # print(f"  75th percentile: {np.percentile(rates, 75):.3f}")
 
 def main():
     """Main function to run the analysis."""
@@ -142,10 +150,10 @@ def main():
     print(f"Loaded {len(df)} total entries")
     print(f"Max context length (L): {df['length'].max()}")
     
-    print(f"\nUsing methods: {METHODS}, answer index: {ANSWER_INDEX}, alpha: {alpha}")
+    print(f"\nUsing methods: {METHODS}, answer indices: 1-50 (averaged), alpha: {alpha}")
     print(f"Compression rates to evaluate: {COMPRESSION_RATES}")
     
-    # Find optimal compression rate for each entry (across all methods)
+    # Find optimal compression rate for each entry (across all methods and answer indices)
     results = find_optimal_compression_per_entry(df)
     
     # Plot distributions
