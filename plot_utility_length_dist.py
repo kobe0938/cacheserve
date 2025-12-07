@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Configuration
-DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/presses_scores_1and2and3.csv'
+DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/presses_scores_1and2and3.csv' # llama 8b
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/length_distribution_plots/'
 # ANSWER_INDEX = 12
 alpha = 1  # Utility function constant, does not affect the results in this graph

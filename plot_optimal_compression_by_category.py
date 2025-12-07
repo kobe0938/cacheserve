@@ -4,7 +4,7 @@ import numpy as np
 from plot_utility_length_dist import calculate_utility, load_data
 
 # Configuration
-DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv'
+DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv' # mistral 7b
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/optimal_compression_plots/'
 METHODS = ['keydiff', 'knorm', 'snapkv']
 ANSWER_INDEX = 1
