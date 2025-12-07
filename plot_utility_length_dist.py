@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Configuration
-DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv'
+DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/relative_scores_final_with_h2o_46to50_higher.csv'
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/length_distribution_plots/'
 ANSWER_INDEX = 1
 A = 1  # Utility function constant
-COMPRESSION_RATE = 0.7  # Fixed compression rate for analysis
-METHODS = ['keydiff', 'knorm', 'snapkv']
+COMPRESSION_RATES = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+METHODS = ['kvzip', 'knorm', 'snapkv']
 
 def load_data():
     """Load the CSV data."""
@@ -61,49 +61,46 @@ def find_best_method_per_entry(df, compression_rate):
     
     return results
 
-def plot_length_distributions(results, compression_rate):
+def plot_length_distributions_grid(all_results):
     """
-    Plot box plots of length distributions for each method.
-    results: dict with method -> [list of lengths]
+    Plot box plots of length distributions for each compression rate in a 3x3 grid.
+    all_results: dict with compression_rate -> {method: [list of lengths]}
     """
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, axes = plt.subplots(3, 3, figsize=(15, 15))
+    axes = axes.flatten()
     
-    # Prepare data for box plot
-    data = []
-    labels = []
+    for idx, compression_rate in enumerate(COMPRESSION_RATES):
+        ax = axes[idx]
+        results = all_results[compression_rate]
+        
+        # Prepare data for box plot
+        data = []
+        labels = []
+        
+        for method in METHODS:
+            if method in results and len(results[method]) > 0:
+                data.append(results[method])
+                labels.append(method)
+        
+        if len(data) > 0:
+            # Create box plot
+            bp = ax.boxplot(data, labels=labels, patch_artist=True)
+            
+            # Style the boxes
+            for patch in bp['boxes']:
+                patch.set_facecolor('steelblue')
+                patch.set_alpha(0.7)
+        
+        ax.set_ylabel('length', fontsize=10)
+        ax.set_title(f'Rate {compression_rate}', fontsize=12)
+        ax.grid(True, alpha=0.3, axis='y')
+        ax.tick_params(axis='x', labelsize=8)
     
-    for method in METHODS:
-        if method in results and len(results[method]) > 0:
-            data.append(results[method])
-            rate_str = str(compression_rate).replace('.', 'p')
-            labels.append(f"{method}\nmethod_{rate_str}")
-    
-    # Create box plot
-    bp = ax.boxplot(data, labels=labels, patch_artist=True)
-    
-    # Style the boxes
-    for patch in bp['boxes']:
-        patch.set_facecolor('steelblue')
-        patch.set_alpha(0.7)
-    
-    ax.set_ylabel('length', fontsize=12)
-    ax.set_title('Length Distribution per Method', fontsize=14)
-    ax.grid(True, alpha=0.3, axis='y')
-    
+    plt.suptitle('Length Distribution per Method at Different Compression Rates', fontsize=16, y=0.995)
     plt.tight_layout()
-    output_filename = f'length_distribution_best_method_rate{rate_str}_answer{ANSWER_INDEX}.png'
+    output_filename = f'length_distribution_grid_answer{ANSWER_INDEX}.png'
     plt.savefig(PLOT_DIR + output_filename, dpi=300, bbox_inches='tight')
-    print(f"Saved plot to {output_filename}")
-    
-    # Print results
-    print("\nEntries won by each method:")
-    total_entries = 0
-    for method in METHODS:
-        if method in results:
-            count = len(results[method])
-            total_entries += count
-            print(f"{method}: {count} entries")
-    print(f"Total entries: {total_entries}")
+    print(f"\nSaved plot to {output_filename}")
 
 def main():
     """Main function to run the analysis."""
@@ -112,16 +109,33 @@ def main():
     print(f"Loaded {len(df)} entries")
     print(f"Max context length (L): {df['length'].max()}")
     
-    # Find best method for each entry
-    results = find_best_method_per_entry(df, COMPRESSION_RATE)
-    # print the average length of the entries won by each method
-    for method in METHODS:
-        if method in results:
-            print(f"{method}: {np.mean(results[method])}")
+    # Process all compression rates
+    all_results = {}
     
-    # Plot distributions
-    plot_length_distributions(results, COMPRESSION_RATE)
+    for compression_rate in COMPRESSION_RATES:
+        print(f"\n{'='*60}")
+        print(f"Processing compression rate: {compression_rate}")
+        print(f"{'='*60}")
+        
+        # Find best method for each entry at this compression rate
+        results = find_best_method_per_entry(df, compression_rate)
+        all_results[compression_rate] = results
+        
+        # Print statistics
+        print("\nEntries won by each method:")
+        total_entries = 0
+        for method in METHODS:
+            if method in results and len(results[method]) > 0:
+                count = len(results[method])
+                avg_length = np.mean(results[method])
+                total_entries += count
+                print(f"  {method}: {count} entries, avg_length={avg_length:.1f}")
+            else:
+                print(f"  {method}: 0 entries")
+        print(f"Total: {total_entries} entries")
+    
+    # Plot all results in a 3x3 grid
+    plot_length_distributions_grid(all_results)
 
 if __name__ == "__main__":
     main()
-
