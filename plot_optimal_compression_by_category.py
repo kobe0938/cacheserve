@@ -1,14 +1,14 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from plot_utility_length_dist import calculate_utility, load_data, A
+from plot_utility_length_dist import calculate_utility, load_data
 
 # Configuration
 DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv'
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/optimal_compression_plots/'
 METHOD = 'snapkv'
 ANSWER_INDEX = 1
-A = 0.5
+alpha = 0.5
 COMPRESSION_RATES = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
 
 # Dataset categories
@@ -65,7 +65,7 @@ def find_optimal_compression_per_entry(df):
                 continue
             
             quality_score = row[col_name]
-            utility = calculate_utility(quality_score, rate, context_length, L)
+            utility = calculate_utility(alpha,quality_score, rate, context_length, L)
             
             if utility > best_utility:
                 best_utility = utility
@@ -108,7 +108,7 @@ def plot_optimal_compression_distribution(results):
     ax.grid(True, alpha=0.3, axis='y')
     
     plt.tight_layout()
-    output_filename = f'optimal_compression_by_category_{METHOD}_answer{ANSWER_INDEX}_alpha{A}.png'
+    output_filename = f'optimal_compression_by_category_{METHOD}_answer{ANSWER_INDEX}_alpha{alpha}.png'
     plt.savefig(PLOT_DIR + output_filename, dpi=300, bbox_inches='tight')
     print(f"\nSaved plot to {output_filename}")
     

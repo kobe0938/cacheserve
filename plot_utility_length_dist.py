@@ -15,13 +15,13 @@ def load_data():
     df = pd.read_csv(DATA_DIR)
     return df
 
-def calculate_utility(quality_score, compression_rate, context_length, L):
+def calculate_utility(alpha, quality_score, compression_rate, context_length, L):
     """
     Calculate utility for a single entry.
     utility = a * quality_score - (remaining_length / L)
     """
     remaining_length = (1 - compression_rate) * context_length
-    utility = A * quality_score - (remaining_length / L)
+    utility = alpha * quality_score - (remaining_length / L)
     return utility
 
 def find_best_method_per_entry(df, compression_rate):
@@ -49,7 +49,8 @@ def find_best_method_per_entry(df, compression_rate):
                 continue
             
             quality_score = row[col_name]
-            utility = calculate_utility(quality_score, compression_rate, context_length, L)
+            alpha = A
+            utility = calculate_utility(alpha, quality_score, compression_rate, context_length, L)
             
             if utility > best_utility:
                 best_utility = utility
