@@ -5,8 +5,8 @@ import numpy as np
 # Configuration
 DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/presses_scores_1and2and3.csv'
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/length_distribution_plots/'
-ANSWER_INDEX = 12
-A = 1  # Utility function constant
+# ANSWER_INDEX = 12
+alpha = 1  # Utility function constant, does not affect the results in this graph
 COMPRESSION_RATE = 0.7  # Fixed compression rate for analysis
 METHODS = ['kvzip', 'knorm', 'snapkv']
 
@@ -27,6 +27,7 @@ def calculate_utility(alpha, quality_score, compression_rate, context_length, L)
 def find_best_method_per_entry(df, compression_rate):
     """
     For each entry, find the method with highest utility at the given compression rate.
+    Uses average utility across answer indices 1-50.
     Returns dict: {method: [list of lengths where this method was best]}
     """
     L = df['length'].max()  # Global max length
@@ -39,21 +40,31 @@ def find_best_method_per_entry(df, compression_rate):
     for idx, row in df.iterrows():
         context_length = row['length']
         best_method = None
-        best_utility = -float('inf')
+        best_avg_utility = -float('inf')
         
         # Calculate utility for each method
         for method in METHODS:
-            col_name = f"{method}_{rate_str}_answer{ANSWER_INDEX}"
+            # Calculate average utility across answer indices 1-50
+            utilities = []
+            for answer_idx in range(1, 51):
+                col_name = f"{method}_{rate_str}_answer{answer_idx}"
+                
+                if col_name not in df.columns:
+                    continue
+                
+                quality_score = row[col_name]
+                utility = calculate_utility(alpha, quality_score, compression_rate, context_length, L)
+                utilities.append(utility)
             
-            if col_name not in df.columns:
-                continue
-            
-            quality_score = row[col_name]
-            alpha = A
-            utility = calculate_utility(alpha, quality_score, compression_rate, context_length, L)
-            
-            if utility > best_utility:
-                best_utility = utility
+            # if idx % 100 == 0:
+            #     print(f"Processing entry {idx}...")
+            #     print(f"Method: {method}")
+            #     print(f"Utilities: {utilities}")
+            assert len(utilities) == 50, f"Expected 50 utilities for {method}_{rate_str}_answer{answer_idx}, got {len(utilities)}"
+            # If we have utilities for this method, take the average
+            avg_utility = np.mean(utilities)
+            if avg_utility > best_avg_utility:
+                best_avg_utility = avg_utility
                 best_method = method
         
         # Add this entry's length to the best method
@@ -69,6 +80,8 @@ def plot_length_distributions(results, compression_rate):
     """
     fig, ax = plt.subplots(figsize=(10, 6))
     
+    rate_str = str(compression_rate).replace('.', 'p')
+    
     # Prepare data for box plot
     data = []
     labels = []
@@ -77,8 +90,7 @@ def plot_length_distributions(results, compression_rate):
     for method in METHODS:
         if method in results and len(results[method]) > 0:
             data.append(results[method])
-            rate_str = str(compression_rate).replace('.', 'p')
-            labels.append(f"{method}\nmethod_{rate_str}")
+            labels.append(f"{method}")
     
     # Create box plot
     bp = ax.boxplot(data, labels=labels, patch_artist=True)
@@ -89,11 +101,11 @@ def plot_length_distributions(results, compression_rate):
         patch.set_alpha(0.7)
     
     ax.set_ylabel('length', fontsize=12)
-    ax.set_title('Length Distribution per Method', fontsize=14)
+    ax.set_title(f'Length Distribution per Method (Rate: {compression_rate}, Answers 1-50 avg, alpha: {alpha})', fontsize=14)
     ax.grid(True, alpha=0.3, axis='y')
     
     plt.tight_layout()
-    output_filename = f'length_distribution_best_method_rate{rate_str}_answer{ANSWER_INDEX}.png'
+    output_filename = f'length_distribution_best_method_rate{rate_str}_answers1-50_alpha{alpha}_compression_rate{compression_rate}.png'
     plt.savefig(PLOT_DIR + output_filename, dpi=300, bbox_inches='tight')
     print(f"Saved plot to {output_filename}")
     
@@ -114,12 +126,14 @@ def main():
     print(f"Loaded {len(df)} entries")
     print(f"Max context length (L): {df['length'].max()}")
     
-    # Find best method for each entry
+    # Find best method for each entry (averaged across answer indices 1-50)
     results = find_best_method_per_entry(df, COMPRESSION_RATE)
-    # print the average length of the entries won by each method
+    
+    # Print the average length of the entries won by each method
+    print("\nAverage length of entries won by each method:")
     for method in METHODS:
-        if method in results:
-            print(f"{method}: {np.mean(results[method])}")
+        if method in results and len(results[method]) > 0:
+            print(f"{method}: {np.mean(results[method]):.1f}")
     
     # Plot distributions
     plot_length_distributions(results, COMPRESSION_RATE)
