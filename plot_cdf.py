@@ -63,25 +63,26 @@ for idx, dataset_name in enumerate(datasets):
     axes[idx].set_ylabel('CDF')
     axes[idx].set_title(dataset_name)
     
-    # Calculate dynamic x-axis range based on data
-    if len(sorted_scores) > 0:
-        min_val = np.min(sorted_scores)
-        max_val = np.max(sorted_scores)
-        range_width = max_val - min_val
+    # # Calculate dynamic x-axis range based on data
+    # if len(sorted_scores) > 0:
+    #     min_val = np.min(sorted_scores)
+    #     max_val = np.max(sorted_scores)
+    #     range_width = max_val - min_val
         
-        # Add padding factor (0.1 = 10% on each side)
-        padding_factor = 0.1
-        x_min = min_val - range_width * padding_factor
-        x_max = max_val + range_width * padding_factor
+    #     # Add padding factor (0.1 = 10% on each side)
+    #     padding_factor = 0.1
+    #     x_min = min_val - range_width * padding_factor
+    #     x_max = max_val + range_width * padding_factor
         
-        # Ensure x_min doesn't go below 0 (since quality drop is between 0 and 1)
-        x_min = max(0, x_min)
-        # Ensure x_max doesn't go above 1
-        x_max = min(1, x_max)
+    #     # Ensure x_min doesn't go below 0 (since quality drop is between 0 and 1)
+    #     x_min = max(0, x_min)
+    #     # Ensure x_max doesn't go above 1
+    #     x_max = min(1, x_max)
         
-        axes[idx].set_xlim([x_min, x_max])
-    else:
-        axes[idx].set_xlim([0, 1])
+    #     axes[idx].set_xlim([x_min, x_max])
+    # else:
+    #     axes[idx].set_xlim([0, 1])
+    axes[idx].set_xlim([0, 1])
     
     axes[idx].set_ylim([0, 1.05])
     axes[idx].grid(True, alpha=0.3)
