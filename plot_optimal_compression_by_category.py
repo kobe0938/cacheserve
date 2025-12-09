@@ -5,11 +5,11 @@ from plot_utility_length_dist import calculate_utility
 
 # Configuration
 # DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv' # mistral 7b
-DATA_DIR = '/Users/xiaokun/Downloads/scores_tokens.csv' # mistral 7b
+DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv' # mistral 7b
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/optimal_compression_plots/'
 METHODS = ['keydiff', 'knorm', 'snapkv']
 ANSWER_INDEX = 1
-alpha = 0.3
+alpha = 0.5
 COMPRESSION_RATES = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
 
 # Dataset categories
@@ -26,18 +26,12 @@ COMPRESSION_RATES = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
 
 # Draw 
 CATEGORIES = {
-    '2wikimqa': ['2wikimqa'],
-    'gov_report': ['gov_report'],
-    'hotpotqa': ['hotpotqa'],
-    'multi_news': ['multi_news'],
-    'multifieldqa_en': ['multifieldqa_en'],
-    'musique': ['musique'],
-    'narrativeqa': ['narrativeqa'],
-    'qasper': ['qasper'],
-    'qmsum': ['qmsum'],
     'samsum': ['samsum'],
-    'trec': ['trec'],
-    'triviaqa': ['triviaqa']
+    'triviaqa': ['triviaqa'],
+    'multi_news': ['multi_news'],
+    'musique': ['musique'],
+    'qasper': ['qasper'],
+    'narrativeqa': ['narrativeqa']
 }
 
 def load_data():
@@ -131,31 +125,34 @@ def find_optimal_compression_per_entry(df):
 
 def plot_optimal_compression_distribution(results):
     """
-    Plot box plots of optimal compression rate distributions for each category.
+    Plot bar chart with error bars of optimal compression rate distributions for each category.
     results: dict with category -> [list of optimal compression rates]
     """
     fig, ax = plt.subplots(figsize=(10, 6))
     
-    # Prepare data for box plot
-    data = []
+    # Prepare data for bar chart
+    means = []
+    errors = []
     labels = []
-    # colors = ['steelblue', 'darkorange', 'forestgreen']
     
     for category in CATEGORIES.keys():
         if category in results and len(results[category]) > 0:
-            data.append(results[category])
+            rates = results[category]
+            means.append(np.mean(rates))
+            # Use standard error of the mean for error bars
+            errors.append(np.std(rates))
             labels.append(category)
     
-    # Create box plot
-    bp = ax.boxplot(data, labels=labels, patch_artist=True)
-    
-    # Style the boxes with different colors
-    for patch in bp['boxes']:
-        patch.set_facecolor('steelblue')
-        patch.set_alpha(0.7)
+    # Create bar chart with error bars
+    x_pos = np.arange(len(labels))
+    bars = ax.bar(x_pos, means, yerr=errors, capsize=5, 
+                   color='steelblue', alpha=0.7, 
+                   error_kw={'elinewidth': 2, 'capthick': 2})
     
     ax.set_ylabel('Optimal Compression Ratio', fontsize=12)
     ax.set_xlabel('Context Type', fontsize=12)
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(labels, rotation=45, ha='right')
     ax.set_ylim([0, 1.0])
     ax.grid(True, alpha=0.3, axis='y')
     
