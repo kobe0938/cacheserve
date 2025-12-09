@@ -171,10 +171,10 @@ def plot_optimal_compression_distribution(results):
             print(f"  Entries: {len(rates)}")
             print(f"  Mean: {np.mean(rates):.3f}")
             print(f"  Median: {np.median(rates):.3f}")
-            # print(f"  Min: {np.min(rates):.3f}")
-            # print(f"  Max: {np.max(rates):.3f}")
-            # print(f"  25th percentile: {np.percentile(rates, 25):.3f}")
-            # print(f"  75th percentile: {np.percentile(rates, 75):.3f}")
+            print(f"  Standard deviation: {np.std(rates):.3f}")
+            # calculate CV
+            cv = np.std(rates) / np.mean(rates)
+            print(f"  CV: {cv:.3f}")
 
 def main():
     """Main function to run the analysis."""
