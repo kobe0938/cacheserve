@@ -4,3 +4,4 @@ cdf_plots/
 *.pyc
 .DS_Store
 *.txt
+intermediate_results/
