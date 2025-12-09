@@ -1,27 +1,49 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from plot_utility_length_dist import calculate_utility, load_data
+from plot_utility_length_dist import calculate_utility
 
 # Configuration
-DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv' # mistral 7b
+# DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv' # mistral 7b
+DATA_DIR = '/Users/xiaokun/Downloads/scores_tokens.csv' # mistral 7b
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/optimal_compression_plots/'
 METHODS = ['keydiff', 'knorm', 'snapkv']
 ANSWER_INDEX = 1
-alpha = 0.5
+alpha = 0.3
 COMPRESSION_RATES = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
 
 # Dataset categories
-CATEGORIES = {
-    'Multi-hop Contexts': ['hotpotqa', 'multi_news'],
-    'Single-hop Contexts': ['triviaqa', 'narrativeqa', 'gov_report', 'qasper'],
-    'Dialogue': ['samsum', 'qmsum']
-}
+# CATEGORIES = {
+#     'Multi-hop Contexts': ['hotpotqa', 'multi_news'],
+#     'Single-hop Contexts': ['triviaqa', 'narrativeqa', 'gov_report', 'qasper'],
+#     'Dialogue': ['samsum', 'qmsum']
+# }
 # CATEGORIES = {
 #     'Multi-hop Contexts': ['qmsum'],
 #     'Single-hop Contexts': ['narrativeqa'],
 #     'Dialogue': ['samsum']
 # }
+
+# Draw 
+CATEGORIES = {
+    '2wikimqa': ['2wikimqa'],
+    'gov_report': ['gov_report'],
+    'hotpotqa': ['hotpotqa'],
+    'multi_news': ['multi_news'],
+    'multifieldqa_en': ['multifieldqa_en'],
+    'musique': ['musique'],
+    'narrativeqa': ['narrativeqa'],
+    'qasper': ['qasper'],
+    'qmsum': ['qmsum'],
+    'samsum': ['samsum'],
+    'trec': ['trec'],
+    'triviaqa': ['triviaqa']
+}
+
+def load_data():
+    """Load the CSV data."""
+    df = pd.read_csv(DATA_DIR)
+    return df
 
 def find_optimal_compression_per_entry(df):
     """
@@ -46,6 +68,7 @@ def find_optimal_compression_per_entry(df):
     
     # For each entry, find the optimal method and compression rate
     for idx, row in df_filtered.iterrows():
+        # print("current idx: ", idx)
         dataset = row['dataset']
         context_length = row['length']
         
@@ -56,8 +79,7 @@ def find_optimal_compression_per_entry(df):
                 category = cat_name
                 break
         
-        if category is None:
-            continue
+        assert category is not None, f"Category is None for entry {idx} in dataset {dataset}"
         
         # Calculate utility for all methods and compression rates
         best_rate = None
@@ -74,22 +96,36 @@ def find_optimal_compression_per_entry(df):
                 for answer_idx in range(1, 101):
                     col_name = f"{method}_{rate_str}_answer{answer_idx}"
                     
-                    if col_name not in df.columns:
-                        continue
-                    
+                    assert col_name in df.columns, f"Column {col_name} not found in dataframe"
+
                     quality_score = row[col_name]
+                    assert quality_score is not None, f"Quality score is None for entry {idx} in dataset {dataset}, col name: {col_name}"
                     utility = calculate_utility(alpha, quality_score, rate, context_length, L)
+                    # if idx == 30:
+                    #     # print alpha, quality_score, rate, context_length, L
+                    #     print(f"method: {method}, rate: {rate}, answer_idx: {answer_idx}, alpha: {alpha}, quality_score: {quality_score}, rate: {rate}, context_length: {context_length}, L: {L}")
+                    #     print(f"utility: {utility}")
+                    assert utility is not None, f"Utility is None for entry {idx} in dataset {dataset}, col name: {col_name}"
                     utilities.append(utility)
                 
                 assert len(utilities) == 100, f"Expected 100 utilities for {method}_{rate_str}_answer{answer_idx}, got {len(utilities)}"
                 avg_utility = np.mean(utilities)
+                assert avg_utility is not None, f"Average utility is None for entry {idx} in dataset {dataset}, col name: {col_name}"
                 if avg_utility > best_avg_utility:
                     best_avg_utility = avg_utility
                     best_rate = rate
-        
+        # if idx == 30:
+        #     print(f"utilities: {utilities}")
+        #     print(f"avg_utility: {avg_utility}")
+        #     print(f"best_avg_utility: {best_avg_utility}")
+        #     print(f"best_rate: {best_rate}")
+        #     print(f"category: {category}")
+        #     print(f"dataset: {dataset}")
+        #     print(f"context_length: {context_length}")
         # Add this entry's optimal compression rate to the category
-        if best_rate is not None:
-            results[category].append(best_rate)
+        # print(f"Best rate: {best_rate} for entry {idx} in dataset {dataset}")
+        # assert best_rate > 0
+        results[category].append(best_rate)
     
     return results
 
@@ -103,9 +139,9 @@ def plot_optimal_compression_distribution(results):
     # Prepare data for box plot
     data = []
     labels = []
-    colors = ['steelblue', 'darkorange', 'forestgreen']
+    # colors = ['steelblue', 'darkorange', 'forestgreen']
     
-    for category in ['Multi-hop Contexts', 'Single-hop Contexts', 'Dialogue']:
+    for category in CATEGORIES.keys():
         if category in results and len(results[category]) > 0:
             data.append(results[category])
             labels.append(category)
@@ -114,8 +150,8 @@ def plot_optimal_compression_distribution(results):
     bp = ax.boxplot(data, labels=labels, patch_artist=True)
     
     # Style the boxes with different colors
-    for patch, color in zip(bp['boxes'], colors):
-        patch.set_facecolor(color)
+    for patch in bp['boxes']:
+        patch.set_facecolor('steelblue')
         patch.set_alpha(0.7)
     
     ax.set_ylabel('Optimal Compression Ratio', fontsize=12)
@@ -131,7 +167,7 @@ def plot_optimal_compression_distribution(results):
     
     # Print statistics
     print("\nOptimal compression rate statistics by category:")
-    for category in ['Multi-hop Contexts', 'Single-hop Contexts', 'Dialogue']:
+    for category in CATEGORIES.keys():
         if category in results and len(results[category]) > 0:
             rates = results[category]
             print(f"\n{category}:")
