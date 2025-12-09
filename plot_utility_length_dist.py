@@ -7,7 +7,7 @@ DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/presses_scores_1and2and3.csv' # ll
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/length_distribution_plots/'
 # ANSWER_INDEX = 12
 alpha = 1  # Utility function constant, does not affect the results in this graph
-COMPRESSION_RATE = 0.7  # Fixed compression rate for analysis
+COMPRESSION_RATE = 0.6  # Fixed compression rate for analysis
 METHODS = ['kvzip', 'knorm', 'snapkv']
 
 def load_data():
