@@ -9,7 +9,7 @@ df = pd.read_csv(DATA_DIR)
 
 # Configuration
 METHOD = 'keydiff'
-COMPRESSION_RATE = 0.8
+COMPRESSION_RATE = 0.9
 
 # Get all datasets
 datasets = df['dataset'].unique()
@@ -44,21 +44,22 @@ for idx, dataset_name in enumerate(datasets):
     
     # Convert to numpy array
     avg_quality_scores = np.array(avg_quality_scores)
+    quality_drops = 1 - avg_quality_scores
     
     print(f"\n{dataset_name}:")
-    print(f"  Number of entries: {len(avg_quality_scores)}")
-    print(f"  Mean quality score: {np.mean(avg_quality_scores):.3f}")
-    print(f"  Median quality score: {np.median(avg_quality_scores):.3f}")
+    print(f"  Number of entries: {len(quality_drops)}")
+    print(f"  Mean quality drop: {np.mean(quality_drops):.3f}")
+    print(f"  Median quality drop: {np.median(quality_drops):.3f}")
     
     # Sort quality scores for CDF
-    sorted_scores = np.sort(avg_quality_scores)
+    sorted_scores = np.sort(quality_drops)
     
     # CDF
     cdf_values = np.arange(1, len(sorted_scores) + 1) / len(sorted_scores)
     
     # Plot CDF
     axes[idx].plot(sorted_scores, cdf_values, linewidth=2, color='steelblue')
-    axes[idx].set_xlabel('Quality Score (Avg over Answers 1-100)')
+    axes[idx].set_xlabel('Quality Drop')
     axes[idx].set_ylabel('CDF')
     axes[idx].set_title(dataset_name)
     axes[idx].set_xlim([0, 1])
@@ -73,7 +74,7 @@ plt.suptitle(f'Quality Score CDF - {METHOD} (Rate: {COMPRESSION_RATE}, Answers 1
              fontsize=16, y=0.995)
 plt.tight_layout()
 
-output_filename = f'{METHOD}_rate{rate_str}_answers1-100_quality_cdf.png'
+output_filename = f'{METHOD}_rate{rate_str}_answers1-100_quality_drop_cdf.png'
 plt.savefig(PLOT_DIR + output_filename, dpi=300, bbox_inches='tight')
 print(f"\nSaved plot to {output_filename}")
 
