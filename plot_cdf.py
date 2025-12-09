@@ -9,7 +9,6 @@ df = pd.read_csv(DATA_DIR)
 
 # Configuration
 METHOD = 'keydiff'
-ANSWER_INDEX = 1
 COMPRESSION_RATE = 0.8
 
 # Get all datasets
@@ -22,28 +21,44 @@ axes = axes.flatten()
 for idx, dataset_name in enumerate(datasets):
     dataset_df = df[df['dataset'] == dataset_name]
     
-    # Get the column name for this method/rate/answer combination
     rate_str = str(COMPRESSION_RATE).replace('.', 'p')
-    col_name = f"{METHOD}_{rate_str}_answer{ANSWER_INDEX}"
     
-    # Get all quality scores for this dataset
-    quality_scores = dataset_df[col_name].values
-    # print(f"# of quality scores: {len(quality_scores)}")
-    print("quality_scores: ", quality_scores)
-    # print mean and median of quality scores
-    print(f"mean: {np.mean(quality_scores)}")
-    print(f"median: {np.median(quality_scores)}")
+    # Calculate average quality score across answer indices 1-100 for each entry
+    avg_quality_scores = []
+    
+    for _, row in dataset_df.iterrows():
+        # Collect quality scores for this entry across all answer indices
+        quality_scores_per_entry = []
+        for answer_idx in range(1, 101):
+            col_name = f"{METHOD}_{rate_str}_answer{answer_idx}"
+            
+            if col_name not in df.columns:
+                continue
+            
+            quality_score = row[col_name]
+            quality_scores_per_entry.append(quality_score)
+        
+        assert len(quality_scores_per_entry) == 100, f"Expected 100 quality scores for {METHOD}_{rate_str}_answer{answer_idx}, got {len(quality_scores_per_entry)}"
+        avg_quality_score = np.mean(quality_scores_per_entry)
+        avg_quality_scores.append(avg_quality_score)
+    
+    # Convert to numpy array
+    avg_quality_scores = np.array(avg_quality_scores)
+    
+    print(f"\n{dataset_name}:")
+    print(f"  Number of entries: {len(avg_quality_scores)}")
+    print(f"  Mean quality score: {np.mean(avg_quality_scores):.3f}")
+    print(f"  Median quality score: {np.median(avg_quality_scores):.3f}")
     
     # Sort quality scores for CDF
-    sorted_scores = np.sort(quality_scores)
+    sorted_scores = np.sort(avg_quality_scores)
     
     # CDF
     cdf_values = np.arange(1, len(sorted_scores) + 1) / len(sorted_scores)
-    # print("cdf_values: ", cdf_values)
     
     # Plot CDF
     axes[idx].plot(sorted_scores, cdf_values, linewidth=2, color='steelblue')
-    axes[idx].set_xlabel('Quality Score')
+    axes[idx].set_xlabel('Quality Score (Avg over Answers 1-100)')
     axes[idx].set_ylabel('CDF')
     axes[idx].set_title(dataset_name)
     axes[idx].set_xlim([0, 1])
@@ -54,11 +69,11 @@ for idx, dataset_name in enumerate(datasets):
 for idx in range(len(datasets), len(axes)):
     axes[idx].axis('off')
 
-plt.suptitle(f'Quality Score CDF - {METHOD} (Rate: {COMPRESSION_RATE}, Answer: {ANSWER_INDEX})', 
+plt.suptitle(f'Quality Score CDF - {METHOD} (Rate: {COMPRESSION_RATE}, Answers 1-100 avg)', 
              fontsize=16, y=0.995)
 plt.tight_layout()
 
-output_filename = f'{METHOD}_rate{rate_str}_answer{ANSWER_INDEX}_quality_cdf.png'
+output_filename = f'{METHOD}_rate{rate_str}_answers1-100_quality_cdf.png'
 plt.savefig(PLOT_DIR + output_filename, dpi=300, bbox_inches='tight')
-print(f"Saved plot to {output_filename}")
+print(f"\nSaved plot to {output_filename}")
 
