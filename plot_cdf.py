@@ -18,7 +18,24 @@ METHOD = 'keydiff'
 COMPRESSION_RATE = 0.9
 
 # Specify datasets to process
-datasets = ['samsum', 'triviaqa', 'multi_news', 'musique', 'qasper', 'narrativeqa']
+datasets = ['samsum', 'triviaqa', 'multi_news', '2wikimqa', 'qasper', 'narrativeqa']
+# '''
+# [
+#  '2wikimqa',
+#  'gov_report',
+#  'hotpotqa',
+#  'multi_news',
+#  'multifieldqa_en',
+#  'musique',
+#  'narrativeqa',
+#  'qasper',
+#  'qmsum',
+#  'samsum',
+#  'trec',
+#  'triviaqa'
+# ]
+# '''
+# datasets = ['samsum', 'triviaqa', 'multi_news', 'musique', 'qasper', 'narrativeqa', '2wikimqa', 'gov_report', 'hotpotqa', 'multifieldqa_en', 'qmsum', 'trec']
 
 # Create subplots
 fig, axes = plt.subplots(2, 3, figsize=(6.5, 2.5))
