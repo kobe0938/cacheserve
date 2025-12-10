@@ -21,7 +21,7 @@ COMPRESSION_RATE = 0.9
 datasets = ['samsum', 'triviaqa', 'multi_news', 'musique', 'qasper', 'narrativeqa']
 
 # Create subplots
-fig, axes = plt.subplots(2, 3, figsize=(7, 3.5))
+fig, axes = plt.subplots(2, 3, figsize=(6.5, 2.5))
 axes = axes.flatten()
 
 for idx, dataset_name in enumerate(datasets):
