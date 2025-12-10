@@ -14,6 +14,29 @@ plt.rcParams['font.family'] = font
 plt.rcParams['font.size'] = font_sz
 
 # ============================
+# Legend customization
+# ============================
+# Mapping for legend labels
+LEGEND_LABEL_MAP = {
+    'keydiff': 'keydiff+LRU-based eviction',
+    'knorm': 'knorm+LRU-based eviction',
+    'snapkv': 'snapkv+LRU-based eviction',
+    'offload': 'eviction only',
+}
+
+# Order and markers for legends (7 legends total)
+LEGEND_ORDER = ['keydiff', 'knorm', 'snapkv', 'impress', 'offload', 'prefill', 'ours']
+LEGEND_MARKERS = {
+    'keydiff': 'v',      # triangle down
+    'knorm': '^',        # triangle up
+    'snapkv': 's',       # square
+    'impress': 'o',      # circle
+    'offload': 'D',      # diamond
+    'prefill': 'p',      # pentagon
+    'ours': '*',         # star
+}
+
+# ============================
 # Configuration: Fill in your directories
 # ============================
 # Each directory should contain CSV files with total_ttft and avg_score columns
@@ -72,13 +95,20 @@ def plot_quality_vs_ttft_subplot(ax, directory, xlabel=False, ylabel=False, show
             print(f"[SKIP] {label}: empty after dropping NaN")
             continue
         
+        # Get custom legend label
+        display_label = LEGEND_LABEL_MAP.get(label, label)
+        
+        # Get marker shape
+        marker = LEGEND_MARKERS.get(label, 'o')
+        
+        # if marker shape is pentagon,marker size is 4
         ax.plot(
             df_plot["total_ttft"],
             df_plot["avg_score"],
-            marker="o",
-            markersize=2,
+            marker=marker,
+            markersize=3.3 if marker == 'p' else 3 if marker == '*' else 2,
             linewidth=1,
-            label=label,
+            label=display_label,
         )
     
     # Formatting
@@ -102,8 +132,47 @@ def plot_quality_vs_ttft_subplot(ax, directory, xlabel=False, ylabel=False, show
     if show_legend:
         handles, labels = ax.get_legend_handles_labels()
         if handles:
-            ax.legend(loc='upper left', fontsize=font_sz, frameon=True, 
-                     bbox_to_anchor=(-0.15, 1.5), ncols=len(handles))
+            # Reorder handles and labels according to LEGEND_ORDER
+            # Create a mapping from display label to (handle, original_key)
+            label_to_handle = {}
+            for h, lbl in zip(handles, labels):
+                # Find the original key for this display label
+                original_key = lbl
+                for key, display_lbl in LEGEND_LABEL_MAP.items():
+                    if display_lbl == lbl:
+                        original_key = key
+                        break
+                label_to_handle[original_key] = (h, lbl)
+            
+
+            # Reorder according to LEGEND_ORDER
+            ordered_handles = []
+            ordered_labels = []
+            for key in LEGEND_ORDER:
+                if key in label_to_handle:
+                    h, lbl = label_to_handle[key]
+                    ordered_handles.append(h)
+                    ordered_labels.append(lbl)
+            
+            # Matplotlib legend uses column-major order with ncols parameter
+            # We need to rearrange for row-major display
+            # With 7 items and ncols=3: we want 3 rows (3, 3, 1 items per row)
+            # But matplotlib fills columns first, so we need to transpose
+            ncols = 3
+            nrows = (len(ordered_handles) + ncols - 1) // ncols  # ceiling division
+            
+            # Rearrange from row-major to column-major
+            reordered_handles = []
+            reordered_labels = []
+            for col in range(ncols):
+                for row in range(nrows):
+                    idx = row * ncols + col
+                    if idx < len(ordered_handles):
+                        reordered_handles.append(ordered_handles[idx])
+                        reordered_labels.append(ordered_labels[idx])
+            
+            ax.legend(reordered_handles, reordered_labels, loc='upper left', fontsize=font_sz, frameon=True, 
+                     bbox_to_anchor=(-0.15, 1.8), ncol=ncols)
 
 # ============================
 # Create 2x3 subplot figure
