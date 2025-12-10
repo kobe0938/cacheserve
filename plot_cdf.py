@@ -11,11 +11,11 @@ df = pd.read_csv(DATA_DIR)
 METHOD = 'keydiff'
 COMPRESSION_RATE = 0.9
 
-# Get all datasets
-datasets = df['dataset'].unique()
+# Specify datasets to process
+datasets = ['samsum', 'triviaqa', 'multi_news', 'musique', 'qasper', 'narrativeqa']
 
 # Create subplots
-fig, axes = plt.subplots(3, 4, figsize=(16, 12))
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 axes = axes.flatten()
 
 for idx, dataset_name in enumerate(datasets):
