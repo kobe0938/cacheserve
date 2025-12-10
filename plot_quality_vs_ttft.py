@@ -45,7 +45,7 @@ DIRS = [
     "intermediate_results/Mistral-7B-Instruct-v0p3/results", 
     "intermediate_results/Qwen2p5-14B-Instruct/results",
     "intermediate_results/Qwen3-30B-A3B-Instruct-2507/results",
-    "intermediate_results/longchat-7b-v1p5-32k/results", 
+    "intermediate_results/placeholder-model/results", 
     "intermediate_results/placeholder-model/results",
 ]
 
