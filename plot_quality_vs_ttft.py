@@ -126,7 +126,7 @@ def plot_quality_vs_ttft_subplot(ax, directory, xlabel=False, ylabel=False, show
     ax.set_ylim(bottom=0)
     ax.yaxis.set_major_locator(MultipleLocator(0.2))
     ax.tick_params(axis='both', which='major', pad=1)
-    ax.grid(True)
+    ax.grid(True, alpha=0.3, linewidth=0.5)
     
     # Add legend above the plot (like in droidspeak_example)
     if show_legend:
@@ -179,7 +179,7 @@ def plot_quality_vs_ttft_subplot(ax, directory, xlabel=False, ylabel=False, show
 # ============================
 fig, axes = plt.subplots(2, 3, figsize=(7, 3.5))
 wspace = 0.35
-hspace = 0.6
+hspace = 0.35
 plt.subplots_adjust(wspace=wspace, hspace=hspace)
 
 # Flatten axes for easier iteration
@@ -211,7 +211,7 @@ for idx, directory in enumerate(DIRS[:6]):  # Only use first 6
         if ylabel:
             ax.set_ylabel("Average score", fontsize=font_sz, labelpad=1)
         ax.yaxis.set_major_locator(MultipleLocator(0.2))
-        ax.grid(True)
+        ax.grid(True, alpha=0.3, linewidth=0.5)
 
 # Save as PDF
 output_path = "quality_vs_ttft.pdf"
