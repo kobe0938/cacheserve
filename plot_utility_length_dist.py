@@ -84,7 +84,7 @@ def plot_length_distributions(results, compression_rate):
     Plot box plots of length distributions for each method.
     results: dict with method -> [list of lengths]
     """
-    fig, ax = plt.subplots(figsize=(3.5, 2.5))
+    fig, ax = plt.subplots(figsize=(3.5, 2.0))
     
     rate_str = str(compression_rate).replace('.', 'p')
     
