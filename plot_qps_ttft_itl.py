@@ -377,7 +377,7 @@ def plot_qps_itl_subplot(ax, directory_name, xlabel=False, ylabel=False, show_le
 # ============================
 # Create 2x3 subplot figure
 # ============================
-fig, axes = plt.subplots(2, 3, figsize=(7, 3.5))
+fig, axes = plt.subplots(2, 3, figsize=(7, 3))
 wspace = 0.35
 hspace = 0.35
 plt.subplots_adjust(wspace=wspace, hspace=hspace)
