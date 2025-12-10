@@ -83,11 +83,15 @@ def plot_quality_vs_ttft_subplot(ax, directory, xlabel=False, ylabel=False, show
     
     # Plot each CSV as a separate line (original logic)
     for df, label in series_list:
-        # Drop NaN and sort by total_ttft
+        # Calculate average TTFT = total_ttft / (555 * 50)
+        df = df.copy()
+        df["avg_ttft"] = df["total_ttft"] / (555 * 50)
+        
+        # Drop NaN and sort by avg_ttft
         df_plot = (
-            df[["total_ttft", "avg_score"]]
-            .dropna(subset=["total_ttft", "avg_score"])
-            .sort_values("total_ttft")
+            df[["avg_ttft", "avg_score"]]
+            .dropna(subset=["avg_ttft", "avg_score"])
+            .sort_values("avg_ttft")
         )
         
         if df_plot.empty:
@@ -102,7 +106,7 @@ def plot_quality_vs_ttft_subplot(ax, directory, xlabel=False, ylabel=False, show
         
         # if marker shape is pentagon,marker size is 4
         ax.plot(
-            df_plot["total_ttft"],
+            df_plot["avg_ttft"],
             df_plot["avg_score"],
             marker=marker,
             markersize=3.3 if marker == 'p' else 3 if marker == '*' else 2,
@@ -117,14 +121,14 @@ def plot_quality_vs_ttft_subplot(ax, directory, xlabel=False, ylabel=False, show
     ax.set_title(model_name, fontsize=font_sz)
     
     if xlabel:
-        ax.set_xlabel("Total TTFT (s)", fontsize=font_sz, labelpad=1)
+        ax.set_xlabel("Average TTFT (s)", fontsize=font_sz, labelpad=1)
     if ylabel:
         ax.set_ylabel("Average score", fontsize=font_sz, labelpad=1)
     
     ax.set_xlim(left=0)
     # Set x-axis limits based on model
     if 'Qwen2p5-14B-Instruct/results' in directory:
-        ax.set_xlim(0, 20000)
+        ax.set_xlim(0, 20000 / (555 * 50))
     ax.yaxis.set_major_locator(MultipleLocator(0.2))
     ax.tick_params(axis='both', which='major', pad=1)
     ax.grid(True, alpha=0.3, linewidth=0.5)
@@ -208,7 +212,7 @@ for idx, directory in enumerate(DIRS[:6]):  # Only use first 6
                 transform=ax.transAxes, fontsize=font_sz)
         ax.set_title(model_name, fontsize=font_sz)
         if xlabel:
-            ax.set_xlabel("Total TTFT (s)", fontsize=font_sz, labelpad=1)
+            ax.set_xlabel("Average TTFT (s)", fontsize=font_sz, labelpad=1)
         if ylabel:
             ax.set_ylabel("Average score", fontsize=font_sz, labelpad=1)
         ax.yaxis.set_major_locator(MultipleLocator(0.2))
