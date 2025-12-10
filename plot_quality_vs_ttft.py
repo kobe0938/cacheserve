@@ -122,7 +122,9 @@ def plot_quality_vs_ttft_subplot(ax, directory, xlabel=False, ylabel=False, show
         ax.set_ylabel("Average score", fontsize=font_sz, labelpad=1)
     
     ax.set_xlim(left=0)
-    ax.set_ylim(bottom=0)
+    # Set x-axis limits based on model
+    if 'Qwen2p5-14B-Instruct/results' in directory:
+        ax.set_xlim(0, 20000)
     ax.yaxis.set_major_locator(MultipleLocator(0.2))
     ax.tick_params(axis='both', which='major', pad=1)
     ax.grid(True, alpha=0.3, linewidth=0.5)
