@@ -5,3 +5,4 @@ cdf_plots/
 .DS_Store
 *.txt
 intermediate_results/
+*.pdf

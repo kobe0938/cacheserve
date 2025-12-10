@@ -2,6 +2,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Font configuration
+font_sz = 8
+font = "Arial"
+plt.rcParams['font.family'] = font
+plt.rcParams['font.size'] = font_sz
+
 # Configuration
 DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/presses_scores_1and2and3.csv' # llama 8b
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/length_distribution_plots/'
@@ -78,7 +84,7 @@ def plot_length_distributions(results, compression_rate):
     Plot box plots of length distributions for each method.
     results: dict with method -> [list of lengths]
     """
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(3.5, 2.5))
     
     rate_str = str(compression_rate).replace('.', 'p')
     
@@ -100,13 +106,13 @@ def plot_length_distributions(results, compression_rate):
         patch.set_facecolor(color)
         patch.set_alpha(0.7)
     
-    ax.set_ylabel('length', fontsize=12)
-    ax.set_title(f'Length Distribution per Method (Rate: {compression_rate}, Answers 1-50 avg, alpha: {alpha})', fontsize=14)
+    ax.set_xlabel('Method', fontsize=font_sz)
+    ax.set_ylabel('Length', fontsize=font_sz)
     ax.grid(True, alpha=0.3, axis='y')
     
     plt.tight_layout()
-    output_filename = f'length_distribution_best_method_rate{rate_str}_answers1-50_alpha{alpha}_compression_rate{compression_rate}.png'
-    plt.savefig(PLOT_DIR + output_filename, dpi=300, bbox_inches='tight')
+    output_filename = f'length_distribution_best_method_rate{rate_str}_answers1-50_alpha{alpha}_compression_rate{compression_rate}.pdf'
+    plt.savefig(PLOT_DIR + output_filename, bbox_inches='tight')
     print(f"Saved plot to {output_filename}")
     
     # Print results
