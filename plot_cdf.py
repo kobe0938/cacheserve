@@ -61,7 +61,11 @@ for idx, dataset_name in enumerate(datasets):
     axes[idx].plot(sorted_scores, cdf_values, linewidth=2, color='steelblue')
     axes[idx].set_xlabel('Quality Drop')
     axes[idx].set_ylabel('CDF')
-    axes[idx].set_title(dataset_name)
+    
+    # Add dataset name inside the plot
+    axes[idx].text(0.05, 0.95, dataset_name, transform=axes[idx].transAxes,
+                   fontsize=12, fontweight='bold', verticalalignment='top',
+                   bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     
     # # Calculate dynamic x-axis range based on data
     # if len(sorted_scores) > 0:
