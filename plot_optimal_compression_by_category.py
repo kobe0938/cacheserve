@@ -3,6 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from plot_utility_length_dist import calculate_utility
 
+# Font configuration
+font_sz = 8
+font = "Arial"
+plt.rcParams['font.family'] = font
+plt.rcParams['font.size'] = font_sz
+
 # Configuration
 # DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv' # mistral 7b
 DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens.csv' # mistral 7b
@@ -138,7 +144,7 @@ def plot_optimal_compression_distribution(results):
     Plot bar chart with error bars of optimal compression rate distributions for each category.
     results: dict with category -> [list of optimal compression rates]
     """
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(3.5, 2.5))
     
     # Prepare data for bar chart
     means = []
@@ -159,8 +165,8 @@ def plot_optimal_compression_distribution(results):
                    color='steelblue', alpha=0.7, 
                    error_kw={'elinewidth': 2, 'capthick': 2})
     
-    ax.set_ylabel('Optimal Compression Ratio', fontsize=12)
-    ax.set_xlabel('Context Type', fontsize=12)
+    ax.set_ylabel('Optimal Compression Ratio', fontsize=font_sz)
+    # ax.set_xlabel('Dataset', fontsize=font_sz)
     ax.set_xticks(x_pos)
     ax.set_xticklabels(labels, rotation=45, ha='right')
     ax.set_ylim([0, 1.0])
@@ -168,8 +174,8 @@ def plot_optimal_compression_distribution(results):
     
     plt.tight_layout()
     methods_str = '_'.join(METHODS)
-    output_filename = f'optimal_compression_by_category_{methods_str}_answers1-100_alpha{alpha}.png'
-    plt.savefig(PLOT_DIR + output_filename, dpi=300, bbox_inches='tight')
+    output_filename = f'optimal_compression_by_category_{methods_str}_answers1-100_alpha{alpha}.pdf'
+    plt.savefig(PLOT_DIR + output_filename, bbox_inches='tight')
     print(f"\nSaved plot to {output_filename}")
     
     # Print statistics
