@@ -73,6 +73,9 @@ for idx, dataset_name in enumerate(datasets):
     print(f"  Number of entries: {len(quality_drops)}")
     print(f"  Mean quality drop: {np.mean(quality_drops):.3f}")
     print(f"  Median quality drop: {np.median(quality_drops):.3f}")
+    # calculate CV
+    cv = np.std(quality_drops) / np.mean(quality_drops)
+    print(f"  CV: {cv:.3f}")
     
     # Sort quality scores for CDF
     sorted_scores = np.sort(quality_drops)
