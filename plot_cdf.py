@@ -65,13 +65,16 @@ for idx, dataset_name in enumerate(datasets):
     
     # Plot CDF
     axes[idx].plot(sorted_scores, cdf_values, linewidth=2, color='steelblue')
-    axes[idx].set_xlabel('Relative Quality Drop', fontsize=font_sz)
-    axes[idx].set_ylabel('CDF', fontsize=font_sz)
+    
+    # Add labels only for leftmost column and bottom row
+    if idx % 3 == 0:  # Leftmost column
+        axes[idx].set_ylabel('CDF', fontsize=font_sz)
+    if idx >= 3:  # Bottom row
+        axes[idx].set_xlabel('Relative Quality Drop', fontsize=font_sz)
     
     # Add dataset name inside the plot
     axes[idx].text(0.05, 0.95, dataset_name, transform=axes[idx].transAxes,
-                   fontsize=font_sz, fontweight='bold', verticalalignment='top',
-                   bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+                   fontsize=font_sz, fontweight='bold', verticalalignment='top')
     
     # # Calculate dynamic x-axis range based on data
     # if len(sorted_scores) > 0:
