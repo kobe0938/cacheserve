@@ -2,6 +2,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Font configuration
+font_sz = 8
+font = "Arial"
+plt.rcParams['font.family'] = font
+plt.rcParams['font.size'] = font_sz
+
 # Load data
 PLOT_DIR = '/Users/xiaokun/Desktop/cacheserve/cdf_plots/'
 DATA_DIR = '/Users/xiaokun/Desktop/cacheserve/scores_tokens_1and2.csv' # llama 8b
@@ -15,7 +21,7 @@ COMPRESSION_RATE = 0.9
 datasets = ['samsum', 'triviaqa', 'multi_news', 'musique', 'qasper', 'narrativeqa']
 
 # Create subplots
-fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+fig, axes = plt.subplots(2, 3, figsize=(7, 3.5))
 axes = axes.flatten()
 
 for idx, dataset_name in enumerate(datasets):
@@ -59,12 +65,12 @@ for idx, dataset_name in enumerate(datasets):
     
     # Plot CDF
     axes[idx].plot(sorted_scores, cdf_values, linewidth=2, color='steelblue')
-    axes[idx].set_xlabel('Quality Drop')
-    axes[idx].set_ylabel('CDF')
+    axes[idx].set_xlabel('Relative Quality Drop', fontsize=font_sz)
+    axes[idx].set_ylabel('CDF', fontsize=font_sz)
     
     # Add dataset name inside the plot
     axes[idx].text(0.05, 0.95, dataset_name, transform=axes[idx].transAxes,
-                   fontsize=12, fontweight='bold', verticalalignment='top',
+                   fontsize=font_sz, fontweight='bold', verticalalignment='top',
                    bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     
     # # Calculate dynamic x-axis range based on data
@@ -95,11 +101,11 @@ for idx, dataset_name in enumerate(datasets):
 for idx in range(len(datasets), len(axes)):
     axes[idx].axis('off')
 
-plt.suptitle(f'Quality Score CDF - {METHOD} (Rate: {COMPRESSION_RATE}, Answers 1-100 avg)', 
-             fontsize=16, y=0.995)
+# plt.suptitle(f'Quality Score CDF - {METHOD} (Rate: {COMPRESSION_RATE}, Answers 1-100 avg)', 
+#              fontsize=font_sz, y=0.995)
 plt.tight_layout()
 
-output_filename = f'{METHOD}_rate{rate_str}_answers1-100_quality_drop_cdf.png'
-plt.savefig(PLOT_DIR + output_filename, dpi=300, bbox_inches='tight')
+output_filename = f'{METHOD}_rate{rate_str}_answers1-100_quality_drop_cdf.pdf'
+plt.savefig(PLOT_DIR + output_filename, bbox_inches='tight')
 print(f"\nSaved plot to {output_filename}")
 
