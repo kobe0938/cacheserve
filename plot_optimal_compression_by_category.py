@@ -35,20 +35,20 @@ CATEGORIES = {
     'samsum': ['samsum'],
     'triviaqa': ['triviaqa'],
     'multi_news': ['multi_news'],
-    'musique': ['musique'],
+    '2wikimqa': ['2wikimqa'],
     'qasper': ['qasper'],
     'narrativeqa': ['narrativeqa']
 }
 
-# # Calculate the average length of each category
-# def calculate_average_length(df):
-#     """
-#     Calculate the average length of each category.
-#     """
-#     for category in CATEGORIES.keys():
-#         df_category = df[df['dataset'].isin(CATEGORIES[category])]
-#         average_length = df_category['length'].mean()
-#         print(f"Average length of {category}: {average_length}")
+# Calculate the average length of each category
+def calculate_average_length(df):
+    """
+    Calculate the average length of each category.
+    """
+    for category in CATEGORIES.keys():
+        df_category = df[df['dataset'].isin(CATEGORIES[category])]
+        average_length = df_category['length'].mean()
+        print(f"Average length of {category}: {average_length}")
 
 def load_data():
     """Load the CSV data."""
@@ -198,7 +198,7 @@ def main():
     df = load_data()
     print(f"Loaded {len(df)} total entries")
     print(f"Max context length (L): {df['length'].max()}")
-    # print(f"Average length of each category: {calculate_average_length(df)}")
+    print(f"Average length of each category: {calculate_average_length(df)}")
     print(f"\nUsing methods: {METHODS}, answer indices: 1-100 (averaged), alpha: {alpha}")
     print(f"Compression rates to evaluate: {COMPRESSION_RATES}")
     
