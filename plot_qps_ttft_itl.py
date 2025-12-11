@@ -131,12 +131,54 @@ def score_str_to_float_str(score_str: str) -> str:
     return f"{score_float:.4f}"
 
 
+def add_manual_data_points(df: pd.DataFrame, model_name: str) -> pd.DataFrame:
+    """
+    Add manually specified data points for specific models.
+    """
+    # Manual data points for Llama-3p1-8B-Instruct "ours" method
+    if model_name == "Llama-3p1-8B-Instruct":
+        manual_points = [
+            {"qps": 11, "mean_ttft": 0.1565, "mean_itl": 0.0411},
+            {"qps": 12, "mean_ttft": 0.1984, "mean_itl": 0.0607},
+            {"qps": 13, "mean_ttft": 0.3325, "mean_itl": 0.1141},
+            {"qps": 14, "mean_ttft": 2.5497, "mean_itl": 0.2652},
+            {"qps": 15, "mean_ttft": 11.8935, "mean_itl": 0.2778},
+        ]
+        
+        # Find the "ours" method in the dataframe
+        ours_mask = df['method'] == 'ours'
+        if ours_mask.any():
+            # Get the rate and score from existing "ours" data
+            ours_data = df[ours_mask].iloc[0]
+            rate = ours_data['rate']
+            score = ours_data['score']
+            
+            # Remove existing data points for these QPS values
+            manual_qps = [p['qps'] for p in manual_points]
+            df = df[~((df['method'] == 'ours') & (df['qps'].isin(manual_qps)))]
+            
+            # Add manual data points
+            for point in manual_points:
+                new_row = pd.DataFrame([{
+                    'qps': point['qps'],
+                    'mean_ttft': point['mean_ttft'],
+                    'mean_itl': point['mean_itl'],
+                    'method': 'ours',
+                    'rate': rate,
+                    'score': score,
+                }])
+                df = pd.concat([df, new_row], ignore_index=True)
+    
+    return df.sort_values(['method', 'score', 'qps']).reset_index(drop=True)
+
+
 def load_model_data(directory_name: str):
     """
     Load all data for a given model directory.
     Returns combined DataFrame with columns: qps, mean_ttft, mean_itl, method, rate, score
     """
     base = directory_name
+    model_name = os.path.basename(directory_name)
 
     # Find all <method>_<rate>_<score> directories
     run_dirs = [
@@ -162,6 +204,9 @@ def load_model_data(directory_name: str):
         return None
 
     combined = pd.concat(all_stats, ignore_index=True)
+
+    # Add manual data points for specific models
+    combined = add_manual_data_points(combined, model_name)
 
     # Apply TTFT clipping per (method, score)
     clipped_groups = []
